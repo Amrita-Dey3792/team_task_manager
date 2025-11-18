@@ -42,6 +42,7 @@ urlpatterns = [
 
     path('api/auth/', include('users.urls')),     # register + login
     path('api/tasks/', include('tasks.urls')),    # task CRUD
+    path('api/companies/', include('companies.urls')),
 
    
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger'),
