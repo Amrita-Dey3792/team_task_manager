@@ -1,48 +1,49 @@
-"""
-URL configuration for team_task_manager project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from drf_yasg.generators import OpenAPISchemaGenerator
+from rest_framework_simplejwt.authentication import JWTAuthentication  
+
+
+security_definition = {
+    'type': 'apiKey',
+    'name': 'Authorization',
+    'in': 'header',
+    'description': '⚠️ IMPORTANT: Enter "Bearer " (with space) followed by your token.\nExample: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...\n\nSteps:\n1. Login at /api/auth/login/ to get your token\n2. Copy the "access" token from response\n3. Enter here: Bearer <paste_your_token>'
+}
+
+class CustomOpenAPISchemaGenerator(OpenAPISchemaGenerator):
+    def get_schema(self, request=None, public=False):
+        schema = super().get_schema(request, public)
+       
+        if not hasattr(schema, 'securityDefinitions'):
+            schema.securityDefinitions = {}
+        
+        schema.securityDefinitions['Bearer'] = security_definition
+        return schema
 
 schema_view = get_schema_view(
     openapi.Info(
         title="Team Task Manager API",
         default_version='v1',
-        description="""A complete team-based task management system with:
-        - User Registration & JWT Login
-        - Company → Team → Task hierarchy
-        - Admin/Member roles
-        - Task assignment, filtering, search, soft delete
-        - Activity logging via signals
-        """,
-        terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="your-email@example.com"),
-        license=openapi.License(name="MIT License"),
+        description="JWT Auth + Task Management",
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
+    authentication_classes=(JWTAuthentication,),
+    generator_class=CustomOpenAPISchemaGenerator,
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('api-auth/', include('rest_framework.urls')),
-    path('api/auth/', include('users.urls')),
-    path('api/tasks/', include('tasks.urls')),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+
+
+    path('api/auth/', include('users.urls')),     # register + login
+    path('api/tasks/', include('tasks.urls')),    # task CRUD
+
+   
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger'),
+
 ]

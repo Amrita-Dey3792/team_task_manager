@@ -117,6 +117,7 @@ class ProfileView(APIView):
     @swagger_auto_schema(
         operation_summary="Get logged-in user profile",
         operation_description="Returns current authenticated user's details",
+        security=[{'Bearer': []}],
         responses={
             200: openapi.Response(
                 description="User profile",
