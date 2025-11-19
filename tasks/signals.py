@@ -1,9 +1,31 @@
-from django.db.models.signals import post_save, pre_delete
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from .models import Task, ActivityLog
 
+_previous_values = {}
+
+@receiver(pre_save, sender=Task)
+def store_previous_values(sender, instance, **kwargs):
+    """Store previous values before save to detect changes"""
+    if instance.pk:
+        try:
+            old_instance = Task.objects.get(pk=instance.pk)
+            _previous_values[instance.pk] = {
+                'assigned_to': old_instance.assigned_to,
+                'status': old_instance.status
+            }
+        except Task.DoesNotExist:
+            _previous_values[instance.pk] = {
+                'assigned_to': None,
+                'status': None
+            }
+
 @receiver(post_save, sender=Task)
 def log_task_actions(sender, instance, created, **kwargs):
+    """Log task actions to ActivityLog"""
+    if instance.is_deleted:
+        return
+    
     if created:
         ActivityLog.objects.create(
             action='task_created',
@@ -12,19 +34,17 @@ def log_task_actions(sender, instance, created, **kwargs):
             task=instance,
             details={'title': instance.title}
         )
-    elif instance.assigned_to and instance.tracker.has_changed('assigned_to'):
-        ActivityLog.objects.create(
-            action='task_assigned',
-            performed_by=instance.created_by.user,
-            team=instance.team,
-            task=instance,
-            target_user=instance.assigned_to.user if instance.assigned_to else None
-        )
-    elif instance.tracker.has_changed('status'):
-        ActivityLog.objects.create(
-            action='task_status_changed',
-            performed_by=instance.created_by.user,
-            team=instance.team,
-            task=instance,
-            details={'old': instance.tracker.previous('status'), 'new': instance.status}
-        )
+    else:
+        prev = _previous_values.get(instance.pk, {})
+        
+        if prev.get('status') and prev.get('status') != instance.status:
+            ActivityLog.objects.create(
+                action='task_status_changed',
+                performed_by=instance.created_by.user,
+                team=instance.team,
+                task=instance,
+                details={'old': prev.get('status'), 'new': instance.status}
+            )
+        
+        if instance.pk in _previous_values:
+            del _previous_values[instance.pk]

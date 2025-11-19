@@ -1,0 +1,9 @@
+{
+  "assigned_to": "john.doe@example.com",
+  "team": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "title": "Implement user authentication feature",
+  "description": "Add JWT-based authentication with login, register, and password reset functionality. Include email verification and token refresh mechanism.",
+  "status": "in_progress",
+  "due_date": "2025-11-25T18:00:00.000Z"
+}
+

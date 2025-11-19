@@ -4,8 +4,6 @@ from django.utils import timezone
 from teams.models import Team, Membership
 from django.conf import settings
 
-# Create your models here.
-
 class Task(models.Model):
     STATUS_CHOICES = [('todo', 'To Do'), ('in_progress', 'In Progress'), ('done', 'Done')]
 
@@ -18,6 +16,7 @@ class Task(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='tasks')
     created_by = models.ForeignKey(Membership, on_delete=models.CASCADE, related_name='created_tasks')
     assigned_to = models.ForeignKey(Membership, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tasks')
+    assigned_members = models.ManyToManyField(Membership, related_name='assigned_tasks_many', blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

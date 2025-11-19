@@ -7,28 +7,28 @@ from drf_yasg.generators import OpenAPISchemaGenerator
 from rest_framework_simplejwt.authentication import JWTAuthentication  
 
 
-security_definition = {
-    'type': 'apiKey',
-    'name': 'Authorization',
-    'in': 'header',
-    'description': '⚠️ IMPORTANT: Enter "Bearer " (with space) followed by your token.\nExample: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...\n\nSteps:\n1. Login at /api/auth/login/ to get your token\n2. Copy the "access" token from response\n3. Enter here: Bearer <paste_your_token>'
-}
-
 class CustomOpenAPISchemaGenerator(OpenAPISchemaGenerator):
     def get_schema(self, request=None, public=False):
         schema = super().get_schema(request, public)
-       
+        
+        # Add security definitions for OpenAPI 2.0 (Swagger)
         if not hasattr(schema, 'securityDefinitions'):
             schema.securityDefinitions = {}
         
-        schema.securityDefinitions['Bearer'] = security_definition
+        schema.securityDefinitions['Bearer'] = {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'JWT Authorization header using the Bearer scheme. Example: "Bearer {token}"\n\nSteps:\n1. Login at /api/auth/login/ to get your token\n2. Copy the "access" token from response\n3. Click "Authorize" button above\n4. Enter: Bearer <your_access_token>'
+        }
+        
         return schema
 
 schema_view = get_schema_view(
     openapi.Info(
         title="Team Task Manager API",
         default_version='v1',
-        description="JWT Auth + Task Management",
+        description="JWT Auth + Task Management API\n\n**Authentication Required:**\n1. First, register or login at `/api/auth/register/` or `/api/auth/login/`\n2. Copy the `access` token from the response\n3. Click the **Authorize** button (lock icon) at the top right\n4. Enter: `Bearer <your_access_token>`\n5. Click **Authorize** and then **Close**\n6. Now you can use all authenticated endpoints!",
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
@@ -38,13 +38,10 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
-
     path('api/auth/', include('users.urls')),     # register + login
-    path('api/tasks/', include('tasks.urls')),    # task CRUD
     path('api/companies/', include('companies.urls')),
-
-   
+    path('api/teams/', include('teams.urls')),
+    path('api/tasks/', include('tasks.urls')),    # task CRUD
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger'),
 
 ]
