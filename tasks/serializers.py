@@ -12,7 +12,7 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = '__all__'
-        read_only_fields = ['created_by', 'is_deleted']
+        read_only_fields = ['created_by', 'is_deleted', 'assigned_to']
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
