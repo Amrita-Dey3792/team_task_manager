@@ -6,7 +6,7 @@ _previous_values = {}
 
 @receiver(pre_save, sender=Task)
 def store_previous_values(sender, instance, **kwargs):
-    """Store previous values before save to detect changes"""
+   
     if instance.pk:
         try:
             old_instance = Task.objects.get(pk=instance.pk)
@@ -22,7 +22,7 @@ def store_previous_values(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Task)
 def log_task_actions(sender, instance, created, **kwargs):
-    """Log task actions to ActivityLog"""
+
     if instance.is_deleted:
         return
     

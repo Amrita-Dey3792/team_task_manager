@@ -197,10 +197,7 @@ class TeamViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsTeamAdmin])
     @transaction.atomic
     def remove_member(self, request, pk=None):
-        """
-        Remove a member from the team.
-        Only team admins can remove members.
-        """
+        
         team = self.get_object()
         user_id = request.data.get('user_id')
 

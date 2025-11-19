@@ -25,7 +25,7 @@ class TaskSerializer(serializers.ModelSerializer):
         self.fields.pop('assigned_to_email', None)
     
     def get_assigned_members(self, obj):
-        """Return list of all assigned members with their details"""
+
         members = []
         for membership in obj.assigned_members.all():
             members.append({
@@ -38,7 +38,7 @@ class TaskSerializer(serializers.ModelSerializer):
         return members
     
     def get_team_members(self, obj):
-        """Return list of all team members"""
+
         members = []
         for membership in obj.team.memberships.all():
             members.append({
@@ -51,19 +51,19 @@ class TaskSerializer(serializers.ModelSerializer):
         return members
     
     def get_created_by(self, obj):
-        """Return email of creator"""
+
         if obj.created_by:
             return obj.created_by.user.email
         return None
     
     def validate_title(self, value):
-        """Validate task title"""
+
         if not value or not value.strip():
             raise serializers.ValidationError("Task title cannot be empty.")
         return value.strip()
     
     def to_internal_value(self, data):
-        """Reject assigned_to field - assignment must be done via assign endpoint"""
+
         if 'assigned_to' in data:
             raise serializers.ValidationError({
                 'assigned_to': 'Tasks cannot be assigned during create or update. Use the assign endpoint (POST /api/tasks/{id}/assign/) to assign tasks.'
@@ -71,6 +71,6 @@ class TaskSerializer(serializers.ModelSerializer):
         return super().to_internal_value(data)
     
     def validate(self, attrs):
-        """Ensure assigned_to is not in attrs (should be read-only)"""
+
         attrs.pop('assigned_to', None)
         return attrs

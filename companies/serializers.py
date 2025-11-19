@@ -14,7 +14,7 @@ class CompanySerializer(serializers.ModelSerializer):
         }
     
     def validate_name(self, value):
-        """Validate company name"""
+
         if not value or not value.strip():
             raise serializers.ValidationError("Company name cannot be empty.")
         return value.strip()

@@ -10,24 +10,14 @@ from .permissions import IsCompanyOwner
 
 
 class CompanyPagination(PageNumberPagination):
-    """
-    Custom pagination class that supports page_size query parameter.
-    Usage: ?page=1&page_size=20
-    """
+  
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 100
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for Company CRUD operations.
-    
-    Requirements:
-    - Create company: Authenticated user becomes owner
-    - List companies: Shows companies where user is owner or team member
-    - Update/Delete: Only company owners can modify/delete
-    """
+ 
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     pagination_class = CompanyPagination
@@ -35,28 +25,18 @@ class CompanyViewSet(viewsets.ModelViewSet):
     search_fields = ['name']
     ordering_fields = ['name', 'created_at']
     ordering = ['-created_at']
-    # Set default permission to allow create action
+   
     permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
-        """
-        Permission configuration:
-        - Create: Requires authentication (user becomes owner)
-        - List/Retrieve/Update/Delete: Requires authentication + ownership check for modifications
-        """
-        # For create action, only authentication is needed
+  
         if self.action == 'create':
             return [IsAuthenticated()]
-        # For other actions (list, retrieve, update, delete), use IsCompanyOwner
-        # which handles both authentication and ownership checks
+        
         return [IsCompanyOwner()]
 
     def get_queryset(self):
-        """
-        Filter companies to show only:
-        1. Companies owned by the user
-        2. Companies where user is a member of at least one team
-        """
+       
         user = self.request.user
         
         return Company.objects.filter(
@@ -165,7 +145,5 @@ class CompanyViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        """
-        Create company and set the authenticated user as owner.
-        """
+      
         serializer.save(created_by=self.request.user)

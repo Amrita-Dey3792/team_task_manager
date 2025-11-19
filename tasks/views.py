@@ -95,12 +95,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_create(self, serializer):
-        """
-        Create task with proper validation:
-        - Verify team exists
-        - Verify user is a member of the team
-        - assigned_to validation is already done by serializer.validate()
-        """
+       
         team = serializer.validated_data.get('team')
         
         if not team:
@@ -137,9 +132,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         }
     )
     def update(self, request, *args, **kwargs):
-        """
-        Update task with field restrictions for members.
-        """
+        
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         
@@ -179,7 +172,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         }
     )
     def partial_update(self, request, *args, **kwargs):
-        """Handle partial update with field restrictions."""
+
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
     
@@ -210,10 +203,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     )
     @action(detail=True, methods=['post'], permission_classes=[IsTaskTeamMember])
     def assign(self, request, pk=None):
-        """
-        Assign task to a team member.
-        Only team admins can assign tasks.
-        """
+        
         task = self.get_object()
         
         membership = task.team.memberships.filter(user=request.user).first()
